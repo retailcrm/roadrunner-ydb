@@ -1,0 +1,46 @@
+version: '3'
+
+rpc:
+  listen: tcp://127.0.0.1:6001
+
+server:
+  command: "php php_test_files/jobs/jobs_ok.php"
+  relay: "pipes"
+  relay_timeout: "20s"
+
+logs:
+  level: debug
+  encoding: console
+  mode: development
+
+ydb:
+  endpoint: "grpc://ydb.test:2136/local"
+#  static_credentials:
+#    user: testUser
+#    password: testPassword
+#  tls:
+#    ca: testCa
+
+jobs:
+  num_pollers: 10
+  pipeline_size: 10
+  timeout: 100
+
+  pool:
+    num_workers: 10
+    allocate_timeout: 60s
+    destroy_timeout: 60s
+
+  consume: [ "test-ydb" ]
+
+  pipelines:
+    test-ydb:
+      driver: ydb
+      config:
+        priority: 1
+        topic: test_topic
+        producer_options:
+          id: test_producer_id
+        consumer_options:
+          name: test_consumer
+

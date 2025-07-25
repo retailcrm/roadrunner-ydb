@@ -1,0 +1,15 @@
+{
+  "name": "test/test",
+  "description": "test",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "spiral/roadrunner-cli": "^2.7",
+    "spiral/roadrunner-jobs": "^4.6"
+  },
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  }
+}
