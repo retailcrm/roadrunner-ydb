@@ -3,9 +3,9 @@ package ydb
 import (
 	"context"
 	"encoding/json"
+	"github.com/retailcrm/roadrunner-ydb/ydbjobs"
 	"github.com/roadrunner-server/api/v4/plugins/v4/jobs"
 	"github.com/roadrunner-server/errors"
-	"github.com/vragovr/roadrunner-ydb/ydbjobs"
 	"github.com/ydb-platform/ydb-go-sdk/v3"
 	"github.com/ydb-platform/ydb-go-sdk/v3/config"
 	"go.uber.org/zap"

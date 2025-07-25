@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"github.com/google/uuid"
+	ydb "github.com/retailcrm/roadrunner-ydb"
 	jobsProto "github.com/roadrunner-server/api/v4/build/jobs/v1"
 	"github.com/roadrunner-server/config/v5"
 	"github.com/roadrunner-server/endure/v2"
@@ -13,7 +14,6 @@ import (
 	rpcPlugin "github.com/roadrunner-server/rpc/v5"
 	"github.com/roadrunner-server/server/v5"
 	"github.com/stretchr/testify/assert"
-	ydb "github.com/vragovr/roadrunner-ydb"
 	"go.uber.org/zap"
 	"log/slog"
 	"os"
