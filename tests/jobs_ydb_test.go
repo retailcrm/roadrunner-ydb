@@ -129,7 +129,7 @@ func TestFoo(t *testing.T) {
 
 	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("job was pushed successfully").Len(), 20)
 	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("job was processed successfully").Len(), 10)
-	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("pipeline was paused").Len(), 1)
+	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("pipeline paused").Len(), 1)
 
 	time.Sleep(1 * time.Second)
 
@@ -144,7 +144,7 @@ func TestFoo(t *testing.T) {
 
 	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("job was pushed successfully").Len(), 20)
 	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("job was processed successfully").Len(), 20)
-	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("pipeline was resumed").Len(), 1)
+	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("pipeline resumed").Len(), 1)
 
 	time.Sleep(1 * time.Second)
 

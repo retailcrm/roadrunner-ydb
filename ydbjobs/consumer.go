@@ -38,7 +38,7 @@ func NewConsumer(
 func (c *consumer) Start() <-chan *topicreader.Message {
 	output := make(chan *topicreader.Message)
 
-	c.logger.Debug("Consumer started")
+	c.logger.Debug("consumer started")
 
 	go func() {
 		defer close(c.doneCh)
@@ -60,7 +60,7 @@ func (c *consumer) Start() <-chan *topicreader.Message {
 					continue
 				}
 
-				c.logger.Error("Failed to read messages", zap.Error(err))
+				c.logger.Error("failed to read messages", zap.Error(err))
 
 				goto shutdown
 			}
@@ -75,7 +75,7 @@ func (c *consumer) Start() <-chan *topicreader.Message {
 			}
 
 			if err := c.reader.Commit(context.Background(), batch); err != nil {
-				c.logger.Error("Failed to commit offsets", zap.Error(err))
+				c.logger.Error("failed to commit offsets", zap.Error(err))
 			}
 
 			commitMessage = nil
@@ -84,14 +84,14 @@ func (c *consumer) Start() <-chan *topicreader.Message {
 	shutdown:
 		if commitMessage != nil {
 			if err := c.reader.Commit(context.Background(), commitMessage); err != nil {
-				c.logger.Error("Failed to commit offsets during shutdown", zap.Error(err))
+				c.logger.Error("failed to commit offsets during shutdown", zap.Error(err))
 			}
 		}
 
 		err := c.reader.Close(context.Background())
 
 		if err != nil {
-			c.logger.Error("Failed to close reader", zap.Error(err))
+			c.logger.Error("failed to close reader", zap.Error(err))
 		}
 	}()
 
@@ -99,11 +99,11 @@ func (c *consumer) Start() <-chan *topicreader.Message {
 }
 
 func (c *consumer) Stop() {
-	c.logger.Debug("Stopping consumer")
+	c.logger.Debug("stopping consumer")
 
 	c.cancel()
 
 	<-c.doneCh
 
-	c.logger.Debug("Consumer stopped successfully")
+	c.logger.Debug("consumer stopped successfully")
 }

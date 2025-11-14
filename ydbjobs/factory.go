@@ -35,19 +35,24 @@ func BuildConsumer(
 	defer cancel()
 
 	if err := reader.WaitInit(ctx); err != nil {
-		logger.Error("Failed to wait for reader initialization", zap.Error(err))
+		logger.Error("failed to wait for reader initialization", zap.Error(err))
 
 		return nil, err
 	}
 
 	c := NewConsumer(reader, logger)
 
+	logger.Info("consumer ready",
+		zap.String("consumer_name", consumerName),
+		zap.String("topic", topic),
+	)
+
 	go func() {
 		for record := range c.Start() {
 			err := handler(record)
 
 			if err != nil {
-				logger.Error("Failed to handle record", zap.Error(err))
+				logger.Error("failed to handle record", zap.Error(err))
 			}
 		}
 	}()
@@ -75,12 +80,17 @@ func BuildProducer(
 	defer cancel()
 
 	if err := writer.WaitInit(ctx); err != nil {
-		logger.Error("Failed to wait for writer initialization", zap.Error(err))
+		logger.Error("failed to wait for writer initialization", zap.Error(err))
 
 		return nil, err
 	}
 
 	p := NewProducer(writer, logger)
+
+	logger.Info("producer ready",
+		zap.String("producer_id", producerId),
+		zap.String("topic", topic),
+	)
 
 	return p, nil
 }

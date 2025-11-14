@@ -36,6 +36,8 @@ func (p *Plugin) Init(log Logger, cfg Configurer) error {
 	p.logger = log.NamedLogger(pluginName)
 	p.cfg = cfg
 
+	p.logger.Info("ydb plugin initialized")
+
 	return nil
 }
 
@@ -64,6 +66,11 @@ func (p *Plugin) DriverFromConfig(configKey string, queue jobs.Queue, pipeline j
 	if err != nil {
 		return nil, err
 	}
+
+	p.logger.Info("creating ydb driver from config",
+		zap.String("pipeline", pipeline.Name()),
+		zap.String("topic", cfg.Topic),
+	)
 
 	return open(cfg, queue, pipeline, p.logger)
 }
@@ -108,6 +115,11 @@ func (p *Plugin) DriverFromPipeline(pipeline jobs.Pipeline, queue jobs.Queue) (j
 
 		cfg.ConsumerOpts = cOpt
 	}
+
+	p.logger.Info("creating ydb driver from pipeline",
+		zap.String("pipeline", pipeline.Name()),
+		zap.String("topic", cfg.Topic),
+	)
 
 	return open(cfg, queue, pipeline, p.logger)
 }

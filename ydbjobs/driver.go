@@ -32,8 +32,10 @@ func (d *Driver) Push(ctx context.Context, msg jobs.Message) error {
 }
 
 func (d *Driver) Run(ctx context.Context, pipeline jobs.Pipeline) error {
-	d.Logger.Debug("starting driver")
-	defer d.Logger.Debug("driver started")
+	d.Logger.Info("pipeline starting",
+		zap.String("pipeline", pipeline.Name()),
+		zap.String("topic", d.Cfg.Topic),
+	)
 
 	pipe := *d.Pipeline.Load()
 	if pipe.Name() != pipeline.Name() {
@@ -69,11 +71,17 @@ func (d *Driver) Run(ctx context.Context, pipeline jobs.Pipeline) error {
 		return err
 	}
 
+	d.Logger.Info("pipeline started - ready for operations",
+		zap.String("pipeline", pipeline.Name()),
+		zap.String("topic", d.Cfg.Topic),
+	)
+
 	return nil
 }
 
 func (d *Driver) Stop(ctx context.Context) error {
-	d.Logger.Debug("stopping driver")
+	pipe := *d.Pipeline.Load()
+	d.Logger.Info("pipeline shutting down", zap.String("pipeline", pipe.Name()))
 
 	defer atomic.StoreUint32(&d.ready, 0)
 
@@ -81,15 +89,17 @@ func (d *Driver) Stop(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	d.Logger.Info("producer stopped")
 
 	d.consumer.Stop()
+	d.Logger.Info("consumer stopped")
 
 	err = d.Driver.Close(ctx)
 	if err != nil {
 		return err
 	}
 
-	d.Logger.Debug("driver stopped")
+	d.Logger.Info("pipeline stopped", zap.String("pipeline", pipe.Name()))
 
 	return nil
 }
@@ -102,14 +112,14 @@ func (d *Driver) Pause(ctx context.Context, pipeline string) error {
 	}
 
 	if atomic.LoadUint32(&d.ready) == 0 {
-		return errors.Errorf("driver is not running")
+		return errors.Errorf("pipeline is not running")
 	}
 
 	d.consumer.Stop()
 	d.consumer = nil
 
 	atomic.StoreUint32(&d.ready, 0)
-	d.Logger.Debug("pipeline was paused")
+	d.Logger.Info("pipeline paused", zap.String("pipeline", pipeline))
 
 	return nil
 }
@@ -122,7 +132,7 @@ func (d *Driver) Resume(ctx context.Context, pipeline string) error {
 	}
 
 	if atomic.LoadUint32(&d.ready) == 1 {
-		return errors.Errorf("driver is already running")
+		return errors.Errorf("pipeline is already running")
 	}
 
 	var err error
@@ -144,7 +154,7 @@ func (d *Driver) Resume(ctx context.Context, pipeline string) error {
 	}
 
 	atomic.StoreUint32(&d.ready, 1)
-	d.Logger.Debug("pipeline was resumed")
+	d.Logger.Info("pipeline resumed", zap.String("pipeline", pipeline))
 
 	return nil
 }
