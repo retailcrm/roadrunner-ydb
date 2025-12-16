@@ -67,7 +67,7 @@ func BuildProducer(
 	producerId string,
 ) (Producer, error) {
 	writer, err := client.StartWriter(topic,
-		topicoptions.WithWriterCodec(topictypes.CodecRaw),
+		topicoptions.WithWriterCodec(topictypes.CodecGzip),
 		topicoptions.WithWriterWaitServerAck(false),
 		topicoptions.WithWriterProducerID(producerId),
 	)
