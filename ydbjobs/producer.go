@@ -49,7 +49,10 @@ func (p producer) Produce(ctx context.Context, msg jobs.Message) error {
 		return err
 	}
 
-	p.logger.Debug("pushing message")
+	p.logger.Debug("message pushed",
+		zap.ByteString("payload", msg.Payload()),
+		zap.Int("payload_size", len(msg.Payload())),
+	)
 
 	return nil
 }
