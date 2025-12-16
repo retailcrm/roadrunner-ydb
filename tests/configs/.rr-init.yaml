@@ -31,7 +31,7 @@ jobs:
     allocate_timeout: 60s
     destroy_timeout: 60s
 
-  consume: [ "test-ydb" ]
+  consume: [ "test-ydb", "test-ydb-without-consumer" ]
 
   pipelines:
     test-ydb:
@@ -43,4 +43,11 @@ jobs:
           id: test_producer_id
         consumer_options:
           name: test_consumer
+    test-ydb-without-consumer:
+      driver: ydb
+      config:
+        priority: 1
+        topic: test_topic_2
+        producer_options:
+          id: test_producer_id_2
 

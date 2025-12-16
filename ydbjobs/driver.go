@@ -46,19 +46,21 @@ func (d *Driver) Run(ctx context.Context, pipeline jobs.Pipeline) error {
 
 	var err error
 
-	d.consumer, err = BuildConsumer(
-		d.Client,
-		d.Logger,
-		d.Cfg.Topic,
-		d.Cfg.ConsumerOpts.Name,
-		func(record *topicreader.Message) error {
-			d.Queue.Insert(fromMessage(record))
+	if d.Cfg.ConsumerOpts != nil {
+		d.consumer, err = BuildConsumer(
+			d.Client,
+			d.Logger,
+			d.Cfg.Topic,
+			d.Cfg.ConsumerOpts.Name,
+			func(record *topicreader.Message) error {
+				d.Queue.Insert(fromMessage(record))
 
-			return nil
-		},
-	)
-	if err != nil {
-		return err
+				return nil
+			},
+		)
+		if err != nil {
+			return err
+		}
 	}
 
 	d.producer, err = BuildProducer(
@@ -91,8 +93,10 @@ func (d *Driver) Stop(ctx context.Context) error {
 	}
 	d.Logger.Info("producer stopped")
 
-	d.consumer.Stop()
-	d.Logger.Info("consumer stopped")
+	if d.consumer != nil {
+		d.consumer.Stop()
+		d.Logger.Info("consumer stopped")
+	}
 
 	err = d.Driver.Close(ctx)
 	if err != nil {
@@ -115,8 +119,10 @@ func (d *Driver) Pause(ctx context.Context, pipeline string) error {
 		return errors.Errorf("pipeline is not running")
 	}
 
-	d.consumer.Stop()
-	d.consumer = nil
+	if d.consumer != nil {
+		d.consumer.Stop()
+		d.consumer = nil
+	}
 
 	atomic.StoreUint32(&d.ready, 0)
 	d.Logger.Info("pipeline paused", zap.String("pipeline", pipeline))
@@ -135,22 +141,24 @@ func (d *Driver) Resume(ctx context.Context, pipeline string) error {
 		return errors.Errorf("pipeline is already running")
 	}
 
-	var err error
+	if d.Cfg.ConsumerOpts != nil {
+		var err error
 
-	d.consumer, err = BuildConsumer(
-		d.Client,
-		d.Logger,
-		d.Cfg.Topic,
-		d.Cfg.ConsumerOpts.Name,
-		func(record *topicreader.Message) error {
-			d.Queue.Insert(fromMessage(record))
+		d.consumer, err = BuildConsumer(
+			d.Client,
+			d.Logger,
+			d.Cfg.Topic,
+			d.Cfg.ConsumerOpts.Name,
+			func(record *topicreader.Message) error {
+				d.Queue.Insert(fromMessage(record))
 
-			return nil
-		},
-	)
+				return nil
+			},
+		)
 
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 
 	atomic.StoreUint32(&d.ready, 1)

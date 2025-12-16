@@ -29,6 +29,7 @@ import (
 func TestFoo(t *testing.T) {
 	address := "127.0.0.1:6001"
 	pipeline := "test-ydb"
+	pipelineWithoutConsumer := "test-ydb-without-consumer"
 
 	cont := endure.New(slog.LevelDebug)
 
@@ -107,6 +108,19 @@ func TestFoo(t *testing.T) {
 		})
 	}
 
+	for i := range 10 {
+		helpers.PushToPipe(t, address, &jobsProto.Job{
+			Id:      uuid.NewString(),
+			Payload: []byte(fmt.Sprintf("test_%d", i)),
+			Headers: map[string]*jobsProto.HeaderValue{"test": {Value: []string{"test_1", "test_2"}}},
+			Options: &jobsProto.Options{
+				Priority: 1,
+				Pipeline: pipelineWithoutConsumer,
+				Topic:    "test-topic",
+			},
+		})
+	}
+
 	time.Sleep(1 * time.Second)
 
 	assert.GreaterOrEqual(t, oLogger.FilterMessageSnippet("job was pushed successfully").Len(), 10)
@@ -134,7 +148,7 @@ func TestFoo(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	state := helpers.Stats(t, address)
-	assert.False(t, state.Stats[0].Ready)
+	assert.False(t, state.Stats[1].Ready)
 
 	time.Sleep(1 * time.Second)
 
@@ -149,7 +163,7 @@ func TestFoo(t *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	state = helpers.Stats(t, address)
-	assert.True(t, state.Stats[0].Ready)
+	assert.True(t, state.Stats[1].Ready)
 
 	time.Sleep(1 * time.Second)
 
