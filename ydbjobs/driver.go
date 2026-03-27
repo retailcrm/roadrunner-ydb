@@ -53,7 +53,7 @@ func (d *Driver) Run(ctx context.Context, pipeline jobs.Pipeline) error {
 			d.Cfg.Topic,
 			d.Cfg.ConsumerOpts.Name,
 			func(record *topicreader.Message) error {
-				d.Queue.Insert(fromMessage(record))
+				d.Queue.Insert(fromMessage(record, pipe.Name()))
 
 				return nil
 			},
@@ -150,7 +150,7 @@ func (d *Driver) Resume(ctx context.Context, pipeline string) error {
 			d.Cfg.Topic,
 			d.Cfg.ConsumerOpts.Name,
 			func(record *topicreader.Message) error {
-				d.Queue.Insert(fromMessage(record))
+				d.Queue.Insert(fromMessage(record, pipe.Name()))
 
 				return nil
 			},
