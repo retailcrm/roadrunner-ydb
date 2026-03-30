@@ -1,12 +1,16 @@
 package ydbjobs
 
 import (
-	"encoding/binary"
 	"encoding/json"
-	"github.com/roadrunner-server/api/v4/plugins/v4/jobs"
 	"github.com/ydb-platform/ydb-go-sdk/v3/topic/topicreader"
 	"io"
 	"strconv"
+)
+
+const (
+	defaultJobName      = "deduced_by_rr"
+	defaultPipelineName = "deduced_by_rr"
+	defaultPriority     = int64(10)
 )
 
 type Item struct {
@@ -118,36 +122,26 @@ func (i *Item) Respond(_ []byte, _ string) error {
 	return nil
 }
 
-func fromMessage(msg *topicreader.Message) *Item {
-	job := "deduced_by_rr"
-	pipeline := "deduced_by_rr"
-	priority := int64(10)
-
-	headers := make(map[string][]string)
-
+func fromMessage(msg *topicreader.Message, pipeline string) *Item {
+	headers := make(map[string][]string, len(msg.Metadata))
 	for key, value := range msg.Metadata {
-		switch key {
-		case jobs.RRJob:
-			job = string(value)
-		case jobs.RRPipeline:
-			pipeline = string(value)
-		case jobs.RRPriority:
-			priority = int64(binary.LittleEndian.Uint64(value))
-		default:
-			headers[key] = []string{string(value)}
-		}
+		headers[key] = []string{string(value)}
+	}
+
+	if pipeline == "" {
+		pipeline = defaultPipelineName
 	}
 
 	data, _ := io.ReadAll(msg)
 
 	item := &Item{
-		Job:     job,
+		Job:     defaultJobName,
 		Ident:   strconv.FormatInt(msg.SeqNo, 10),
 		Payload: data,
 		headers: headers,
 
 		Options: &Options{
-			Priority:  priority,
+			Priority:  defaultPriority,
 			Pipeline:  pipeline,
 			Partition: int32(msg.PartitionID()),
 			Queue:     msg.Topic(),
